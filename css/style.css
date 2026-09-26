@@ -495,6 +495,7 @@ body.online-guest #btn-pause { display: none; }
   flex-direction: column;
   gap: 0.45rem;
 }
+.hand-area > * { flex-shrink: 0; } /* scroll instead of squashing the hand under the button */
 .hand-area__header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.3rem 1rem; }
 .hand-title { font-weight: 800; }
 .hand-message { font-size: 0.9rem; color: var(--muted); }
