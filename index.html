@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Hidden Suit — a multiplayer shedding card game with a secret twist.">
+  <title>Hidden Suit</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- =============================================================== -->
+    <!-- MAIN MENU                                                        -->
+    <!-- =============================================================== -->
+    <section id="screen-menu" class="screen screen--active" aria-labelledby="menu-title">
+      <div class="menu-card">
+        <div class="menu-logo" aria-hidden="true">
+          <span class="suit-red">♥</span><span>♠</span><span class="suit-red">♦</span><span>♣</span>
+        </div>
+        <h1 id="menu-title" class="menu-title">Hidden Suit</h1>
+        <p class="menu-subtitle">Shed your cards. Hide what you can't follow. Don't be last.</p>
+
+        <div class="menu-section">
+          <h2 class="menu-label">Game Mode</h2>
+          <div class="mode-grid" role="radiogroup" aria-label="Game mode">
+            <button type="button" class="mode-btn" data-mode="pass" role="radio">
+              <span class="mode-icon" aria-hidden="true">📱</span>
+              <span class="mode-name">Pass &amp; Play</span>
+              <span class="mode-desc">Share one device with friends</span>
+            </button>
+            <button type="button" class="mode-btn" data-mode="ai" role="radio">
+              <span class="mode-icon" aria-hidden="true">🤖</span>
+              <span class="mode-name">AI Practice</span>
+              <span class="mode-desc">You vs computer opponents</span>
+            </button>
+            <button type="button" class="mode-btn" data-mode="online" role="radio">
+              <span class="mode-icon" aria-hidden="true">🌐</span>
+              <span class="mode-name">Online Room</span>
+              <span class="mode-desc">Each player on their own phone</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Local modes: choose the number of players -->
+        <div id="local-count-section" class="menu-section">
+          <h2 class="menu-label">Number of Players</h2>
+          <div id="player-count-buttons" class="count-grid" role="radiogroup" aria-label="Number of players"></div>
+        </div>
+
+        <!-- Online mode: create or join a room -->
+        <div id="online-panel" class="menu-section online-panel" hidden>
+          <label class="name-field name-field--large">
+            <span>Your name</span>
+            <input type="text" id="online-name" maxlength="16" placeholder="Your name">
+          </label>
+          <button type="button" id="btn-create-room" class="btn btn--primary btn--large">Create Room</button>
+          <div class="join-row">
+            <input type="text" id="join-code" maxlength="4" placeholder="CODE" autocapitalize="characters" autocomplete="off" aria-label="Room code">
+            <button type="button" id="btn-join-room" class="btn">Join Room</button>
+          </div>
+          <p id="online-note" class="online-note">Everyone opens this same web address on their own phone. One player creates a room, the others join with its code.</p>
+        </div>
+
+        <details id="settings-details" class="menu-section menu-details">
+          <summary class="menu-label">Player Names &amp; Settings</summary>
+          <div id="player-name-inputs" class="name-grid"></div>
+          <div class="settings-row">
+            <label for="ai-speed-select">AI speed</label>
+            <select id="ai-speed-select">
+              <option value="slow">Slow</option>
+              <option value="normal">Normal</option>
+              <option value="fast">Fast</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <label for="sound-toggle-menu">Sound effects</label>
+            <input type="checkbox" id="sound-toggle-menu">
+          </div>
+        </details>
+
+        <button type="button" id="btn-start" class="btn btn--primary btn--large">Start Game</button>
+        <button type="button" id="btn-menu-rules" class="btn btn--ghost">How to Play</button>
+      </div>
+    </section>
+
+    <!-- =============================================================== -->
+    <!-- ONLINE LOBBY                                                     -->
+    <!-- =============================================================== -->
+    <section id="screen-lobby" class="screen" aria-labelledby="lobby-title">
+      <div class="menu-card lobby-card">
+        <h2 id="lobby-title" class="menu-label">Room code</h2>
+        <div id="lobby-code" class="lobby-code"></div>
+        <div class="share-row">
+          <input type="text" id="lobby-link" readonly aria-label="Invite link">
+          <button type="button" id="btn-copy-link" class="btn btn--small">Copy link</button>
+        </div>
+        <h3 class="menu-label">Players <span id="lobby-count"></span></h3>
+        <ul id="lobby-players" class="lobby-players"></ul>
+        <p id="lobby-status" class="lobby-status"></p>
+        <div id="lobby-host-actions" class="lobby-actions">
+          <button type="button" id="btn-add-bot" class="btn">+ Add AI player</button>
+          <button type="button" id="btn-start-online" class="btn btn--primary">Start Game</button>
+        </div>
+        <button type="button" id="btn-leave-room" class="btn btn--ghost">Leave Room</button>
+      </div>
+    </section>
+
+    <!-- =============================================================== -->
+    <!-- GAME SCREEN                                                      -->
+    <!-- =============================================================== -->
+    <section id="screen-game" class="screen" aria-label="Game table">
+      <header class="topbar">
+        <div class="topbar__brand">Hidden <span class="suit-red">♥</span> Suit</div>
+        <nav class="topbar__controls" aria-label="Game controls">
+          <button type="button" class="icon-btn" id="btn-new" title="New Game">🆕<span>New</span></button>
+          <button type="button" class="icon-btn" id="btn-restart" title="Restart Game">🔄<span>Restart</span></button>
+          <button type="button" class="icon-btn" id="btn-pause" title="Pause">⏸<span>Pause</span></button>
+          <button type="button" class="icon-btn" id="btn-sound" title="Sound On/Off">🔊<span>Sound</span></button>
+          <button type="button" class="icon-btn" id="btn-rules" title="Game Rules">📖<span>Rules</span></button>
+          <button type="button" class="icon-btn" id="btn-log" title="Game Log">📜<span>Log</span></button>
+          <button type="button" class="icon-btn" id="btn-exit" title="Exit to Menu">🚪<span>Exit</span></button>
+        </nav>
+      </header>
+
+      <main class="game-layout">
+        <div class="table-wrap">
+          <div id="table" class="table">
+            <div id="seats" class="seats"></div>
+
+            <div class="table-center">
+              <div id="round-info" class="round-info"></div>
+              <div id="round-area" class="round-area" aria-live="polite"></div>
+              <div id="table-message" class="table-message" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+
+        <aside id="log-panel" class="log-panel" aria-label="Game log">
+          <div class="log-panel__header">
+            <h3>Game Log</h3>
+            <button type="button" class="icon-btn icon-btn--small" id="btn-log-close" title="Close log">✕</button>
+          </div>
+          <ol id="log-list" class="log-list"></ol>
+        </aside>
+      </main>
+
+      <!-- The current player's private hand -->
+      <section id="hand-area" class="hand-area" aria-label="Your hand">
+        <div class="hand-area__header">
+          <div id="hand-title" class="hand-title"></div>
+          <div id="hand-message" class="hand-message" aria-live="polite"></div>
+        </div>
+        <div id="private-notices" class="private-notices"></div>
+        <div id="hidden-suit-panel" class="hidden-suit-panel"></div>
+        <div id="hand" class="hand"></div>
+        <div class="hand-actions">
+          <button type="button" id="btn-confirm" class="btn btn--primary" disabled>Confirm Move</button>
+        </div>
+      </section>
+    </section>
+
+    <!-- =============================================================== -->
+    <!-- OVERLAYS                                                         -->
+    <!-- =============================================================== -->
+
+    <!-- Pass-and-play privacy screen: covers everything between turns -->
+    <div id="privacy-screen" class="overlay overlay--privacy" hidden>
+      <div class="privacy-card">
+        <div class="privacy-icon" aria-hidden="true">🔒</div>
+        <h2 id="privacy-title"></h2>
+        <p id="privacy-text"></p>
+        <button type="button" id="btn-reveal" class="btn btn--primary btn--large">Reveal My Hand</button>
+      </div>
+    </div>
+
+    <!-- Generic modal (round results, confirmations, rules, game over) -->
+    <div id="modal" class="overlay" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <h2 id="modal-title" class="modal__title"></h2>
+        <div id="modal-body" class="modal__body"></div>
+        <div id="modal-actions" class="modal__actions"></div>
+      </div>
+    </div>
+
+    <!-- Pause overlay -->
+    <div id="pause-overlay" class="overlay" hidden>
+      <div class="modal modal--small">
+        <h2 class="modal__title">⏸ Paused</h2>
+        <p>The game is paused. AI players will wait.</p>
+        <div class="modal__actions">
+          <button type="button" id="btn-resume" class="btn btn--primary">Resume</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast-container" class="toast-container" aria-live="assertive"></div>
+
+    <!-- Online: shown while the connection to the room is lost -->
+    <div id="connection-banner" class="connection-banner" role="status" hidden></div>
+
+    <!-- Debug panel (only shown when DEBUG_MODE = true in js/utils.js) -->
+    <aside id="debug-panel" class="debug-panel" hidden></aside>
+
+    <!-- Rules content (copied into the modal by ui.js) -->
+    <template id="rules-template">
+      <div class="rules">
+        <h3>🎯 Goal</h3>
+        <p>Get rid of all your cards. Players finish in order (#1, #2, …). The <strong>last player still holding cards loses</strong>.</p>
+
+        <h3>🃏 Setup</h3>
+        <p>A standard 52-card deck is shuffled and <em>all</em> cards are dealt to 2–10 players (hands can be uneven). Play goes around the table in a fixed circular order. A random player starts the first round.</p>
+
+        <h3>♥ Active suit</h3>
+        <p>The round starter plays <strong>any</strong> card. Its suit becomes the <strong>active suit</strong>.</p>
+        <div class="rules-example">P1 plays <b class="suit-red">6♥</b> → active suit is <b class="suit-red">Hearts</b>.</div>
+
+        <h3>➡️ Following suit</h3>
+        <p>If you have at least one card of the active suit you <strong>must</strong> play exactly one of them (any one you like).</p>
+
+        <h3>🔒 The Hidden Suit</h3>
+        <p>If you have <strong>no</strong> card of the active suit, pick one suit you hold and secretly play <strong>ALL</strong> your cards of that suit, face down. Nobody else learns the suit, the cards or how many.</p>
+        <div class="rules-example">Active: ♥. You hold A♠ 7♠ 3♠ 9<span class="suit-red">♦</span> 4<span class="suit-red">♦</span> K♣ → you choose Spades → A♠ 7♠ 3♠ are played face down.</div>
+
+        <h3>⛔ The round ends immediately</h3>
+        <p>The moment someone makes a hidden play, the round stops. Nobody after them plays.</p>
+
+        <h3>📥 Broken round: collection</h3>
+        <p>The player with the <strong>highest card of the original active suit</strong> collects <strong>every</strong> card of the round — including the hidden ones — and starts the next round. Only the collector sees what the hidden cards were.</p>
+        <div class="rules-example">P1 <b class="suit-red">6♥</b> · P2 <b class="suit-red">9♥</b> · P3 <b class="suit-red">K♥</b> · P4 🔒 → P3 (K♥) collects all of it and leads next.</div>
+
+        <h3>✨ Clean round: removal</h3>
+        <p>If <strong>everyone</strong> follows the active suit, it's a clean round. Nobody collects — all those cards are <strong>removed from the game forever</strong>. The highest card's owner starts the next round.</p>
+        <div class="rules-example">P1 <b class="suit-red">6♥</b> · P2 <b class="suit-red">K♥</b> · P3 <b class="suit-red">J♥</b> · P4 <b class="suit-red">9♥</b> → 4 cards removed, P2 (K♥) leads next.</div>
+
+        <h3>🏁 Finishing</h3>
+        <p>When your hand reaches 0 cards (after the round is resolved) you finish and leave the rotation. If the player who should lead next has just finished, the next active player clockwise leads instead.</p>
+
+        <h3>💀 The loser</h3>
+        <p>When only one player still holds cards, the game ends and that player is the loser.</p>
+
+        <p class="rules-note">Rank order: 2 &lt; 3 &lt; … &lt; 10 &lt; J &lt; Q &lt; K &lt; A. Only active-suit cards count for the highest card.</p>
+      </div>
+    </template>
+  </div>
+
+  <!-- Scripts: order matters (each file adds to the HiddenSuit namespace) -->
+  <!-- Firebase (only used by Online Rooms; local modes work without it / offline) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+  <script src="js/utils.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/deck.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="js/network.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/tests.js"></script>
+  <script src="js/debug.js"></script>
+  <script src="js/online.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
