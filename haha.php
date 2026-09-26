@@ -1,3 +1,3 @@
 <?php 
-echo "hello";exit;
+echo "hello namaste";exit;
 ?>
